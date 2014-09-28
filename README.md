@@ -12,7 +12,7 @@ forget it. *famous last words*
 Dependencies
 ------------
 
-None
+github.com/codegangsta/cli
 
 How to get it
 ---------------
