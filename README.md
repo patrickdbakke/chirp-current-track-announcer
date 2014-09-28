@@ -32,7 +32,7 @@ How to run it
 -------------
 
 ```
-cagocs:chirp-current-track-announcer christopheragocs$ ./announcer --help
+$ ./announcer --help
 NAME:
    Announcer - Report current track to the Prostream
 
