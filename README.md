@@ -1,5 +1,5 @@
 CHIRP Current Track Announcer
------------------------------
+=============================
 
 This little thing sits at the station and polls the ChIRP API every 30 seconds.
 It parses the JSON response and sends that to the ProStream via UDP, so that the
@@ -10,26 +10,26 @@ make sure it keeps running. Honestly, though, you could easily set this and
 forget it. *famous last words*
 
 Dependencies
-============
+------------
 
 None
 
 How to get it
-===============
+---------------
 
 ```
 go get github.com/agocs/chirp-current-track-announcer
 ```
 
 How to test it
-==============
+--------------
 
 ```
 go test
 ```
 
 How to run it
-=============
+-------------
 
 ```
 cagocs:chirp-current-track-announcer christopheragocs$ ./announcer --help
