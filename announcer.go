@@ -38,7 +38,7 @@ func main() {
 	app.Usage = "Report current track to the Prostream"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"prostream", "", "IP address or hostname of the Prostream device."},
-		cli.IntFlag{"port", 9000, "Port of the Prostream track information reciever"},
+		cli.IntFlag{"port", 9000, "Port of the Prostream track information receiver"},
 		cli.StringFlag{"chirp", "", "URL of the CHIRP current_playlist API endpoint"},
 		cli.BoolFlag{"verbose", "Run in Verbose mode."},
 		cli.BoolFlag{"test", "Run in test mode. Sends nothing to Prostream"},
