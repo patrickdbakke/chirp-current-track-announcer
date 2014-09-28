@@ -83,7 +83,9 @@ func grabAndSendData(prostream string, prostreamPort int, chirpApi string,
 
 	for {
 		currentTrack := grabCurrentTrackInfo(chirpApi, verbose)
-		sendCurrentTrackToProstream(currentTrack, prostream, prostreamPort, verbose)
+		if !test {
+			sendCurrentTrackToProstream(currentTrack, prostream, prostreamPort, verbose)
+		}
 		if runOnce {
 			break //break out of the loop and exit
 		} else {
