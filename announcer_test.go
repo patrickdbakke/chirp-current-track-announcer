@@ -172,8 +172,12 @@ func Test_makeRDSMessage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := makeRDSMessage(tt.args.currentTrack); got != tt.want {
+			got := makeRDSMessage(tt.args.currentTrack)
+			if got != tt.want {
 				t.Errorf("makeRDSMessage() = %v, want %v", got, tt.want)
+			}
+			if len(got)> 132 {
+				t.Errorf("makeRDSMessage() length = %v, want <=132", len(got))
 			}
 		})
 	}
