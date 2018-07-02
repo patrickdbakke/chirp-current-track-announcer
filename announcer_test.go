@@ -150,3 +150,31 @@ func TestGetTrackInfoFromJson(t *testing.T) {
 		t.Errorf("Expected \"Homeboy Sandman\", got %s", exampleTrack.Artist)
 	}
 }
+
+func Test_makeRDSMessage(t *testing.T) {
+	type args struct {
+		currentTrack track
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{name: "Basic test",
+		args: args{currentTrack:track{Artist: "Regina Spektor", Track:"Chemo Limo"}},
+		want: "DPS='Chemo Limo' by Regina Spektor on WCXP-LP\n"},
+		{name: "Long message test",
+		args: args{currentTrack:track{Artist:"Sufjean Stephens", Track: "Concerning the UFO sighting on blah blah blah blah blah blah blah blah blah blah blah blah blah blah"}},
+		want: "DPS='Concerning the UFO sighting on blah blah blah blah blah blah blah blah blah blah blah blah blah blah' by Sufjean Stephens\n"},
+		{name: "Extra long message test",
+			args: args{currentTrack:track{Artist:"Sufjean Stephens", Track: "Concerning the UFO sighting on blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah"}},
+			want: "DPS='Concerning the UFO sighting on blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah' by Sufjean ...\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := makeRDSMessage(tt.args.currentTrack); got != tt.want {
+				t.Errorf("makeRDSMessage() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
