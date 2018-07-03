@@ -162,7 +162,7 @@ func Test_makeRDSMessage(t *testing.T) {
 	}{
 		{name: "Basic test",
 		args: args{currentTrack:track{Artist: "Regina Spektor", Track:"Chemo Limo"}},
-		want: "DPS='Chemo Limo' by Regina Spektor on WCXP-LP\n"},
+		want: "DPS='Chemo Limo' by Regina Spektor on CHIRP Radio\n"},
 		{name: "Long message test",
 		args: args{currentTrack:track{Artist:"Sufjean Stephens", Track: "Concerning the UFO sighting on blah blah blah blah blah blah blah blah blah blah blah blah blah blah"}},
 		want: "DPS='Concerning the UFO sighting on blah blah blah blah blah blah blah blah blah blah blah blah blah blah' by Sufjean Stephens\n"},

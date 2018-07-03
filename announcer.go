@@ -218,7 +218,7 @@ func makeRDSMessage(currentTrack track) string {
 		baseMessage = baseMessage[:124] + "..."
 	}
 
-	stationID := " on WCXP-LP"
+	stationID := " on CHIRP Radio"
 
 	totalMessage := baseMessage
 	if len(baseMessage) + len(stationID) < 128 {
