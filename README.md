@@ -85,3 +85,19 @@ This will run the service once, printing out useful information as it does so.
 ```
 
 This will run the service in quiet mode forever. It will only print errors it encounters.
+
+
+How to run it during development
+--------------------------------
+
+Install dependencies
+```
+go get github.com/urfave/cli
+go get bufio
+go get sync
+```
+
+Run it
+```
+go run announcer.go
+```

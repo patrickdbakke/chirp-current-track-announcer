@@ -1,0 +1,23 @@
+{
+  "name": "chirp-current-track-announcer",
+  "version": "0.0.0",
+  "description": "CHIRP Current Track Announcer =============================",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --timeout 20000",
+    "prettier": "prettier --write '**/*.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chirpradio/chirp-current-track-announcer.git"
+  },
+  "dependencies": {
+    "chai": "^4.2.0",
+    "dgram": "^1.0.1",
+    "express": "^4.17.1",
+    "mocha": "^7.0.1",
+    "prettier": "^1.19.1",
+    "shelljs": "^0.8.3",
+    "sinon": "^8.1.1"
+  }
+}

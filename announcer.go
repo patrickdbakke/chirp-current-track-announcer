@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -39,21 +38,23 @@ type playlist struct {
 func main() {
 	// Entry point to the application
 	// Boilerplate CLI stuff
-	app := cli.NewApp()
-	app.Name = "Announcer"
-	app.Usage = "Report current track to the Prostream"
-	app.Flags = []cli.Flag{
-		cli.StringFlag{Name:"prostream",  Value:"", Usage:"IP address or hostname of the Prostream device."},
-		cli.IntFlag{Name:"port", Value:9000, Usage:"Port of the Prostream track information receiver"},
-		cli.StringFlag{Name:"chirp", Value:"https://chirpradio.appspot.com/api/current_playlist", Usage:"URL of the CHIRP current_playlist API endpoint"},
-		cli.BoolFlag{Name:"verbose", Usage:"Run in Verbose mode."},
-		cli.BoolFlag{Name:"test", Usage:"Run in test mode. Sends nothing to Prostream"},
-		cli.BoolFlag{Name:"runOnce", Usage:"Run once and then quit"},
-		cli.StringFlag{Name:"rds", Value:"", Usage:"IP address or hostname of the RDS Encoder"},
-		cli.IntFlag{Name:"pdsPort", Value:23, Usage:"Port used by the RDS Encoder"},
-	}
-	app.Action = func(c *cli.Context) {
-		parseAndRun(c)
+	app := &cli.App{
+		Name: "Announcer",
+		Usage: "Report current track to the Prostream",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name:"prostream",  Value:"", Usage:"IP address or hostname of the Prostream device."},
+			&cli.IntFlag{Name:"port", Value:9000, Usage:"Port of the Prostream track information receiver"},
+			&cli.StringFlag{Name:"chirp", Value:"https://chirpradio.appspot.com/api/current_playlist", Usage:"URL of the CHIRP current_playlist API endpoint"},
+			&cli.BoolFlag{Name:"verbose", Usage:"Run in Verbose mode."},
+			&cli.BoolFlag{Name:"test", Usage:"Run in test mode. Sends nothing to Prostream"},
+			&cli.BoolFlag{Name:"runOnce", Usage:"Run once and then quit"},
+			&cli.StringFlag{Name:"rds", Value:"", Usage:"IP address or hostname of the RDS Encoder"},
+			&cli.IntFlag{Name:"rdsPort", Value:23, Usage:"Port used by the RDS Encoder"},
+		},
+		Action: func(c *cli.Context) error {
+			parseAndRun(c)
+			return nil
+		},
 	}
 	app.Run(os.Args)
 }
@@ -119,13 +120,14 @@ func grabAndSendData(prostream string, prostreamPort int, rds string, rdsPort in
 
 //grabCurrentTrackInfo gets the current track info from the CHIRP API
 func grabCurrentTrackInfo(chirpApi string, verbose bool) track {
+
 	niceUrl := makeNiceUrl(chirpApi)
-
+	
 	writemsg(fmt.Sprintf("About to GET %s", niceUrl), verbose)
-
 	resp, err := http.Get(niceUrl)
+
 	if err != nil {
-		log.Printf("Error connecting to the CHIRP api: , %s\n", err.Error())
+		fmt.Printf("Error connecting to the CHIRP api: , %s\n", err.Error())
 		return track{"", "", "", ""}
 	}
 
@@ -149,7 +151,7 @@ func getTrackInfoFromJson(jsonPlaylist []byte, verbose bool) track {
 
 	err := json.Unmarshal(jsonPlaylist, &playlistInfo)
 	if err != nil {
-		log.Printf("Error unmarshalling the playlist. %s", err.Error())
+		fmt.Printf("Error unmarshalling the playlist. %s", err.Error())
 		return track{"", "", "", ""}
 	}
 
@@ -164,8 +166,9 @@ func sendCurrentTrackToProstream(currentTrack track, prostream string, prostream
 	defer wg.Done()
 	niceAddress := fmt.Sprintf("%s:%d", prostream, prostreamPort)
 	conn, err := net.Dial("udp", niceAddress)
+	
 	if err != nil {
-		log.Printf("Error dialing the Prostream. %s", err.Error())
+		fmt.Printf("Error dialing the Prostream. %s", err.Error())
 		return
 	}
 
@@ -185,15 +188,18 @@ func sendCurrentTrackToRDS(currentTrack track, rds string, rdsPort int, verbose 
 	defer wg.Done()
 	addressPort :=  fmt.Sprintf("%s:%d", rds, rdsPort)
 	conn, err := net.Dial("tcp", addressPort)
-	defer conn.Close()
-	if err != nil {
-		log.Printf("Error dialing the RDS. %+v", err)
-	}
 
-	message := makeRDSMessage(currentTrack)
+	if err != nil {
+		fmt.Printf("Error dialing the RDS. %+v", err)
+		return
+	}
+	defer conn.Close()
+
+	message := makeRDSMessage(currentTrack, verbose)
 	_, err = conn.Write([]byte(message))
 	if err != nil {
-		log.Printf("Error writing message to RDS: %+v", err)
+		fmt.Printf("Error writing message to RDS: %+v", err)
+		return
 	}
 	sc := bufio.NewScanner(conn)
 
@@ -203,7 +209,7 @@ func sendCurrentTrackToRDS(currentTrack track, rds string, rdsPort int, verbose 
 	resp := sc.Text()
 
 	if resp == "NO"{
-		log.Printf("The RDS Encoder did not like the input %s", message)
+		fmt.Printf("The RDS Encoder did not like the input %s", message)
 	}
 }
 
@@ -211,7 +217,7 @@ func sendCurrentTrackToRDS(currentTrack track, rds string, rdsPort int, verbose 
 // Note that DPS messages can be no greater than 128 characters. If the message winds up
 // being greater than 128 characters, we should truncate it and end it with `...`.
 // #TODO: make unicode characters into their closest ASCII Latin1 equivalent chars
-func makeRDSMessage(currentTrack track) string {
+func makeRDSMessage(currentTrack track, verbose bool) string {
 	baseMessage := fmt.Sprintf("'%s' by %s", currentTrack.Track, currentTrack.Artist)
 
 	if len(baseMessage)> 128{
@@ -224,11 +230,12 @@ func makeRDSMessage(currentTrack track) string {
 	if len(baseMessage) + len(stationID) < 128 {
 		totalMessage = baseMessage + stationID
 	}
+	writemsg(fmt.Sprintf("Sending to RDS: %+s", "DPS="+totalMessage + "\n"), verbose);
 	return "DPS="+totalMessage + "\n"
 }
 
 func writemsg(message string, verbose bool) {
 	if verbose {
-		log.Println(message)
+		fmt.Println(message)
 	}
 }
