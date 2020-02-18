@@ -129,7 +129,7 @@ describe("announcer", () => {
     });
 
     context("when talking to prostream", () => {
-      const expectedMessage = `t=Go Away - Jeff Parker | u=http://www.chirpradio.org\r\n`;
+      const expectedMessage = `t=G̊ó Ȃw̾a͂y̒ - Jeff Parker | u=http://www.chirpradio.org\r\n`;
       const expectedErrorLog = `The RDS Encoder did not like the input ${expectedMessage}`;
       context("when prostream can handle the data correctly", () => {
         beforeEach(() => {

@@ -8,11 +8,14 @@ import (
 	"net/http"
 	"os"
 	"time"
+    "unicode"
 
 
 	"github.com/urfave/cli"
 	"bufio"
 	"sync"
+    "golang.org/x/text/transform"
+    "golang.org/x/text/unicode/norm"
 )
 
 /*
@@ -175,8 +178,9 @@ func sendCurrentTrackToProstream(currentTrack track, prostream string, prostream
 	writemsg("Established connection", verbose)
 
 	//using the default format specified by the Prostream manual
-	fmt.Fprint(conn, fmt.Sprintf("t=%s - %s | u=http://www.chirpradio.org\r\n",
-		currentTrack.Track, currentTrack.Artist))
+	message := fmt.Sprintf("t=%s - %s | u=http://www.chirpradio.org\r\n",currentTrack.Track, currentTrack.Artist);
+	// message = transformSpecialCharacters(message);
+	fmt.Fprint(conn, message);
 
 	//godspeed little udp packet
 	conn.Close()
@@ -213,6 +217,19 @@ func sendCurrentTrackToRDS(currentTrack track, rds string, rdsPort int, verbose 
 	}
 }
 
+func isMn(r rune) bool {
+    return unicode.Is(unicode.Mn, r) // Mn: nonspacing marks
+}
+
+func transformSpecialCharacters(s string) string {
+    t := transform.Chain(norm.NFD, transform.RemoveFunc(isMn), norm.NFC)
+    result, _, _ := transform.String(t, s)
+    println(s)
+    println(result)
+
+    return result
+}
+
 //makeRDSMessage should construct a properly formatted RDS 'DPS' message.
 // Note that DPS messages can be no greater than 128 characters. If the message winds up
 // being greater than 128 characters, we should truncate it and end it with `...`.
@@ -230,6 +247,7 @@ func makeRDSMessage(currentTrack track, verbose bool) string {
 	if len(baseMessage) + len(stationID) < 128 {
 		totalMessage = baseMessage + stationID
 	}
+	totalMessage = transformSpecialCharacters(totalMessage);
 	writemsg(fmt.Sprintf("Sending to RDS: %+s", "DPS="+totalMessage + "\n"), verbose);
 	return "DPS="+totalMessage + "\n"
 }
